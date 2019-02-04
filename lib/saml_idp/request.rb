@@ -84,7 +84,7 @@ module SamlIdp
       end
     end
 
-    def valid?
+    def valid?(sign_info = {})
       unless service_provider?
         log "Unable to find service provider for issuer #{issuer}"
         return false
@@ -95,7 +95,7 @@ module SamlIdp
         return false
       end
 
-      unless valid_signature?
+      unless valid_signature?(sign_info)
         log "Signature is invalid in #{raw_xml}"
         return false
       end
@@ -106,6 +106,8 @@ module SamlIdp
       end
 
       if !service_provider.acceptable_response_hosts.include?(response_host)
+        log service_provider.acceptable_response_hosts
+        log response_host
         log "No acceptable AssertionConsumerServiceURL, either configure them via config.service_provider.response_hosts or match to your metadata_url host"
         return false
       end
@@ -113,10 +115,10 @@ module SamlIdp
       return true
     end
 
-    def valid_signature?
+    def valid_signature?(sign_info = {})
       # Force signatures for logout requests because there is no other
       # protection against a cross-site DoS.
-      service_provider.valid_signature?(document, logout_request?)
+      service_provider.valid_signature?(document, logout_request?, sign_info)
     end
 
     def service_provider?
