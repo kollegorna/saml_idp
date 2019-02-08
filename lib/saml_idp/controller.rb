@@ -58,7 +58,7 @@ module SamlIdp
       audience_uri = opts[:audience_uri] || saml_request.issuer || saml_acs_url[/^(.*?\/\/.*?\/)/, 1]
       opt_issuer_uri = opts[:issuer_uri] || issuer_uri
       my_authn_context_classref = opts[:authn_context_classref] || authn_context_classref
-      acs_url = opts[:acs_url] || saml_acs_url
+      @acs_url = acs_url = opts[:acs_url] || saml_acs_url
       expiry = opts[:expiry] || 60*60
       session_expiry = opts[:session_expiry]
       encryption_opts = opts[:encryption] || nil
@@ -114,7 +114,7 @@ module SamlIdp
     end
 
     def saml_acs_url
-      saml_request.acs_url
+      saml_request.acs_url || @acs_url
     end
 
     def saml_logout_url
