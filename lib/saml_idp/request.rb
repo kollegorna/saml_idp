@@ -78,7 +78,7 @@ module SamlIdp
 
     def log(msg)
       if defined?(::Rails) && Rails.logger
-        Rails.logger.info msg
+        Rails.logger.send(config.log_level, msg)
       else
         puts msg
       end
