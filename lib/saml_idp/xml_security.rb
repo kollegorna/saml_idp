@@ -75,9 +75,13 @@ module SamlIdp
         signature_algorithm = algorithm(sign_info[:sig_alg])
         signature = Base64.decode64(sign_info[:signature])
 
-        verifiable = "SAMLRequest=#{CGI.escape(sign_info[:saml_request])}" +
-          "&RelayState=#{CGI.escape(sign_info[:relay_state])}" +
-          "&SigAlg=#{CGI.escape(sign_info[:sig_alg])}"
+        if sign_info[:relay_state].present?
+          verifiable = "SAMLRequest=#{CGI.escape(sign_info[:saml_request])}" +
+              "&RelayState=#{CGI.escape(sign_info[:relay_state])}" +
+              "&SigAlg=#{CGI.escape(sign_info[:sig_alg])}"
+        else
+          verifiable = "SAMLRequest=#{CGI.escape(sign_info[:saml_request])}&SigAlg=#{CGI.escape(sign_info[:sig_alg])}"
+        end
 
         unless cert.public_key.verify(signature_algorithm.new, signature, verifiable)
           return soft ? false : (raise ValidationError.new("Key validation error"))
